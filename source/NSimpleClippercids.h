@@ -16,8 +16,10 @@ static const Steinberg::FUID kNSimpleClipperControllerUID (0x9FED3586, 0x6FF050A
 
 enum NSimpleClipperParams : Steinberg::Vst::ParamID
 {
-	kParamCeilingId = 102,
-	kParamGainId = 103,
+	kParamPreGainId,
+	kParamCeilingId,
+	kParamGainId,
+	kParamMixId,
 };
 
 //------------------------------------------------------------------------

@@ -81,6 +81,10 @@ tresult PLUGIN_API NSimpleClipperProcessor::process (Vst::ProcessData& data)
 				int32 numPoints = paramQueue->getPointCount ();
 				switch (paramQueue->getParameterId ())
 				{
+				case NSimpleClipperParams::kParamPreGainId:
+					if (paramQueue->getPoint(numPoints - 1, sampleOffset, value) == kResultTrue)
+						mPreGain = value;
+					break;
 				case NSimpleClipperParams::kParamCeilingId:
 					if (paramQueue->getPoint(numPoints - 1, sampleOffset, value) == kResultTrue)
 						mCeiling = value;
@@ -88,6 +92,10 @@ tresult PLUGIN_API NSimpleClipperProcessor::process (Vst::ProcessData& data)
 				case NSimpleClipperParams::kParamGainId:
 					if (paramQueue->getPoint(numPoints - 1, sampleOffset, value) == kResultTrue)
 						mGain = value;
+					break;
+				case NSimpleClipperParams::kParamMixId:
+					if (paramQueue->getPoint(numPoints - 1, sampleOffset, value) == kResultTrue)
+						mMix = value;
 					break;
 				}
 			}
@@ -113,12 +121,18 @@ tresult PLUGIN_API NSimpleClipperProcessor::process (Vst::ProcessData& data)
 				Vst::Sample32* ptrIn = data.inputs[i].channelBuffers32[c];
 				Vst::Sample32* ptrOut = data.outputs[i].channelBuffers32[c];
 				Vst::Sample32 temp;
+				Vst::Sample32 raw;
 
 				while (--samples >= 0)
 				{
 					temp = (*ptrIn++);
+					raw = temp;
+
+					temp *= mPreGain * 2;
 					temp = (abs(temp) > mCeiling) ? (temp > 0 ? mCeiling : -mCeiling) : temp;
-					temp += temp * mGain;
+					temp *= mGain * 2;
+					temp = temp * mMix + raw * (1.0 - mMix);
+
 					(*ptrOut++) = temp;
 				}
 
@@ -189,13 +203,15 @@ tresult PLUGIN_API NSimpleClipperProcessor::setState (IBStream* state)
 	// called when we load a preset, the model has to be reloaded
 	IBStreamer streamer (state, kLittleEndian);
 
-	float savedParams[] = { 0.f, 0.f };
-	if (streamer.readFloatArray(savedParams, 2) == false)
+	float savedParams[] = { 0.f, 0.f, 0.f, 0.f};
+	if (streamer.readFloatArray(savedParams, 4) == false)
 	{
 		return kResultFalse;
 	}
-	mCeiling = savedParams[0];
-	mGain = savedParams[0];
+	mPreGain = savedParams[0];
+	mCeiling = savedParams[1];
+	mGain = savedParams[2];
+	mMix = savedParams[3];
 
 	
 	return kResultOk;
@@ -205,9 +221,9 @@ tresult PLUGIN_API NSimpleClipperProcessor::setState (IBStream* state)
 tresult PLUGIN_API NSimpleClipperProcessor::getState (IBStream* state)
 {
 	// here we need to save the model
-	float toSaveParams[] = { mCeiling, mGain };
+	float toSaveParams[] = { mPreGain, mCeiling, mGain, mMix };
 	IBStreamer streamer (state, kLittleEndian);
-	streamer.writeFloatArray(toSaveParams, 2);
+	streamer.writeFloatArray(toSaveParams, 4);
 
 	return kResultOk;
 }

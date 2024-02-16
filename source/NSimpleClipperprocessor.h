@@ -51,7 +51,9 @@ public:
 //------------------------------------------------------------------------
 protected:
 	Steinberg::Vst::ParamValue mCeiling = 1.;
-	Steinberg::Vst::ParamValue mGain = 0.;
+	Steinberg::Vst::ParamValue mGain = .5;
+	Steinberg::Vst::ParamValue mPreGain = .5;
+	Steinberg::Vst::ParamValue mMix = 1.;
 };
 
 //------------------------------------------------------------------------

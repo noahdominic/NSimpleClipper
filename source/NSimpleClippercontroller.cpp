@@ -25,9 +25,11 @@ tresult PLUGIN_API NSimpleClipperController::initialize (FUnknown* context)
 		return result;
 	}
 
-	// Here you could register some parameters
+	// Here you could register some 
+	parameters.addParameter(STR16("Pre-Gain"), STR16("dB"), 0, .5f, Vst::ParameterInfo::kCanAutomate, NSimpleClipperParams::kParamPreGainId, 0);
 	parameters.addParameter(STR16("Ceiling"), STR16("dB"), 0, 1.f, Vst::ParameterInfo::kCanAutomate, NSimpleClipperParams::kParamCeilingId, 0);
-	parameters.addParameter(STR16("Gain"), STR16("dB"), 0, 0.f, Vst::ParameterInfo::kCanAutomate, NSimpleClipperParams::kParamGainId, 0);
+	parameters.addParameter(STR16("Gain"), STR16("dB"), 0, .5f, Vst::ParameterInfo::kCanAutomate, NSimpleClipperParams::kParamGainId, 0);
+	parameters.addParameter(STR16("Mix"), STR16("%"), 0, 1.f, Vst::ParameterInfo::kCanAutomate, NSimpleClipperParams::kParamMixId, 0);
 
 	return result;
 }
@@ -52,16 +54,20 @@ tresult PLUGIN_API NSimpleClipperController::setComponentState (IBStream* state)
 
 	// called when we load a preset, the model has to be reloaded
 	IBStreamer streamer(state, kLittleEndian);
-	float savedParams[] = { 0.f, 0.f };
-	if (streamer.readFloatArray(savedParams, 2) == false)
+	float savedParams[] = { 0.f, 0.f, 0.f, 0.f };
+	if (streamer.readFloatArray(savedParams, 4) == false)
 	{
 		return kResultFalse;
 	}
 
-	if (auto param = parameters.getParameter(NSimpleClipperParams::kParamCeilingId))
+	if (auto param = parameters.getParameter(NSimpleClipperParams::kParamPreGainId))
 		param->setNormalized(savedParams[0]);
-	if (auto param = parameters.getParameter(NSimpleClipperParams::kParamGainId))
+	if (auto param = parameters.getParameter(NSimpleClipperParams::kParamCeilingId))
 		param->setNormalized(savedParams[1]);
+	if (auto param = parameters.getParameter(NSimpleClipperParams::kParamGainId))
+		param->setNormalized(savedParams[2]);
+	if (auto param = parameters.getParameter(NSimpleClipperParams::kParamMixId))
+		param->setNormalized(savedParams[3]);
 
 	return kResultOk;
 }
