@@ -1,7 +1,5 @@
 # NSimpleClipper
 
-## Description
-
 NSimpleClipper is a basic hard clipper VST plugin designed for audio processing.  It provides a simple yet effective way to hard clip audio signals.
 
 ## Installation
