@@ -27,4 +27,4 @@ This plugin is distributed under the GPLv3 licence.  See the [LICENSE](https://g
 
 ## Contact
 
-For support, bug reports, or feature requests, please contact [send me an email](mailto:noah@noahdominic.com).
+For support, bug reports, or feature requests, please [send me an email](mailto:noah@noahdominic.com).
